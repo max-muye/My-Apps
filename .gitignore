@@ -1,3 +1,3 @@
 # Large Electron runtime files
-/app/browser.app/Contents/Frameworks/Electron Framework.framework/
-/app/Localtalk.app/Contents/Resources/node/
+/app/browser.app/
+/app/Localtalk.app/
