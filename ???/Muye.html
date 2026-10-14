@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Muye's personal site for software, systems, and creative technical work.">
+    <meta property="og:title" content="Muye">
+    <meta property="og:description" content="Software, systems, and creative technical work.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.muye.dev/">
+    <meta property="og:image" content="https://www.muye.dev/assets/hero-workspace-us.png">
+    <title>Muye</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="preload" href="assets/hero-workspace-us.png" as="image">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header" aria-label="Primary">
+      <a class="brand" href="#top" aria-label="Muye home">Muye</a>
+      <nav>
+        <a href="#work">Work</a>
+        <a href="#notes">Notes</a>
+        <a href="/cdn-cgi/l/email-protection#fe969b929291be938b879bd09a9b88">Contact</a>
+        <a class="nav-auth sign-in" href="/create-email">Create email</a>
+        <a href="/mailbox">Mailbox</a>
+        <a class="nav-auth sign-in" href="/sign-in">Sign in</a>
+        <a class="nav-auth sign-up" href="/sign-up">Sign up</a>
+        <button class="nav-auth sign-in home-sign-out" id="home-sign-out" type="button" hidden>Sign out</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <picture>
+          <img src="assets/hero-workspace-us.png" alt="A warm developer workspace overlooking New York City at dusk.">
+        </picture>
+        <div class="hero-shade" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">www.muye.dev</p>
+          <h1 id="hero-title" class="hero-prompt">Please sign up or sign in</h1>
+          <p class="lede">
+            I build thoughtful software, shape ideas into working systems, and keep a small record of what I learn along the way.
+          </p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button primary" href="/mailbox">Mailbox</a>
+            <a class="button secondary" href="/create-email">Create email</a>
+            <a class="button secondary" href="#work">View work</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="intro" aria-label="Focus areas">
+        <p>
+          A personal space for projects, notes, experiments, and the occasional polished thing worth sharing.
+        </p>
+        <dl>
+          <div>
+            <dt>Build</dt>
+            <dd>Reliable products, prototypes, and automation.</dd>
+          </div>
+          <div>
+            <dt>Write</dt>
+            <dd>Short notes on engineering, taste, and tools.</dd>
+          </div>
+          <div>
+            <dt>Explore</dt>
+            <dd>Interfaces, agents, creative systems, and web craft.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="work" class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Selected Work</p>
+          <h2>Things in motion</h2>
+        </div>
+        <div class="work-grid">
+          <article class="work-card">
+            <span>01</span>
+            <h3>Product Systems</h3>
+            <p>Designing small, durable tools that make daily work feel lighter and clearer.</p>
+          </article>
+          <article class="work-card">
+            <span>02</span>
+            <h3>AI Workflows</h3>
+            <p>Composing agents, automations, and human review loops into practical workflows.</p>
+          </article>
+          <article class="work-card">
+            <span>03</span>
+            <h3>Web Experiments</h3>
+            <p>Exploring fast, expressive sites with careful interaction and quiet visual polish.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="notes" class="section notes">
+        <div class="section-heading">
+          <p class="eyebrow">Notes</p>
+          <h2>Recently thinking about</h2>
+        </div>
+        <div class="note-list">
+          <a href="/notes/software-taste/">
+            <span>Software taste</span>
+            <strong>How small interface choices compound into trust.</strong>
+          </a>
+          <a href="/notes/agentic-tools/">
+            <span>Agentic tools</span>
+            <strong>Where automation should be decisive, and where it should ask.</strong>
+          </a>
+          <a href="/notes/personal-websites/">
+            <span>Personal websites</span>
+            <strong>Why a domain can be a workshop before it becomes a portfolio.</strong>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© <span id="year"></span> Muye. Built for Cloudflare Pages.</p>
+      <a href="/cdn-cgi/l/email-protection#a1c9c4cdcdcee1ccd4d8c48fc5c4d7"><span class="__cf_email__" data-cfemail="bad2dfd6d6d5fad7cfc3df94dedfcc">[email&#160;protected]</span></a>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script defer crossorigin="anonymous" data-clerk-publishable-key="pk_live_Y2xlcmsubXV5ZS5kZXYk" src="https://clerk.muye.dev/npm/@clerk/clerk-js@6/dist/clerk.browser.js"></script>
+    <script defer src="script.js?v=6"></script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"188837bf0cc44045a0d774aed734e46b","r":1}' crossorigin="anonymous"></script>
+</body>
+</html>

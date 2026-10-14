@@ -1,0 +1,28 @@
+export function isAdminRequest(request) {
+	const hostname = new URL(request.url).hostname.replace(/^\[/, "").replace(/\]$/, "");
+	return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+export function getClientIp(request, userId) {
+	const forwarded = request.headers.get("x-forwarded-for")?.split(",").map((value) => value.trim()) || [];
+	const cloudflare = request.headers.get("cf-connecting-ip")?.trim();
+	const realIp = request.headers.get("x-real-ip")?.trim();
+	const candidates = [
+		...forwarded,
+		realIp,
+		cloudflare
+	].filter((value) => Boolean(value));
+	const normalized = candidates.map((value) => value.replace(/^::ffff:/, ""));
+	const loopbackAddresses = new Set([
+		"127.0.0.1",
+		"::1",
+		"localhost"
+	]);
+	const remoteAddress = normalized.find((value) => !loopbackAddresses.has(value));
+	if (remoteAddress) return remoteAddress;
+	if (isAdminRequest(request) && normalized[0]) return normalized[0];
+	// Local reverse proxies may report every LAN visitor as 127.0.0.1. Treating
+	// that as a shared visitor IP would lock every computer to the first account.
+	return `visitor:${userId}`;
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJtYXBwaW5ncyI6IkFBQUEsT0FBTyxTQUFTLGVBQWUsU0FBa0I7Q0FDL0MsTUFBTSxXQUFXLElBQUksSUFBSSxRQUFRLEdBQUcsRUFBRSxTQUFTLFFBQVEsT0FBTyxFQUFFLEVBQUUsUUFBUSxPQUFPLEVBQUU7Q0FDbkYsT0FBTyxhQUFhLGVBQWUsYUFBYSxlQUFlLGFBQWE7QUFDOUU7QUFFQSxPQUFPLFNBQVMsWUFBWSxTQUFrQixRQUFnQjtDQUM1RCxNQUFNLFlBQVksUUFBUSxRQUFRLElBQUksaUJBQWlCLEdBQUcsTUFBTSxHQUFHLEVBQUUsS0FBSyxVQUFVLE1BQU0sS0FBSyxDQUFDLEtBQUssQ0FBQztDQUN0RyxNQUFNLGFBQWEsUUFBUSxRQUFRLElBQUksa0JBQWtCLEdBQUcsS0FBSztDQUNqRSxNQUFNLFNBQVMsUUFBUSxRQUFRLElBQUksV0FBVyxHQUFHLEtBQUs7Q0FDdEQsTUFBTSxhQUFhO0VBQUMsR0FBRztFQUFXO0VBQVE7Q0FBVSxFQUFFLFFBQVEsVUFBMkIsUUFBUSxLQUFLLENBQUM7Q0FDdkcsTUFBTSxhQUFhLFdBQVcsS0FBSyxVQUFVLE1BQU0sUUFBUSxZQUFZLEVBQUUsQ0FBQztDQUMxRSxNQUFNLG9CQUFvQixJQUFJLElBQUk7RUFBQztFQUFhO0VBQU87Q0FBVyxDQUFDO0NBRW5FLE1BQU0sZ0JBQWdCLFdBQVcsTUFBTSxVQUFVLENBQUMsa0JBQWtCLElBQUksS0FBSyxDQUFDO0NBQzlFLElBQUksZUFBZSxPQUFPO0NBQzFCLElBQUksZUFBZSxPQUFPLEtBQUssV0FBVyxJQUFJLE9BQU8sV0FBVzs7O0NBSWhFLE9BQU8sV0FBVztBQUNwQiIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJfYWRtaW4tYXV0aC50cyJdLCJ2ZXJzaW9uIjozLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZnVuY3Rpb24gaXNBZG1pblJlcXVlc3QocmVxdWVzdDogUmVxdWVzdCkge1xuICBjb25zdCBob3N0bmFtZSA9IG5ldyBVUkwocmVxdWVzdC51cmwpLmhvc3RuYW1lLnJlcGxhY2UoL15cXFsvLCBcIlwiKS5yZXBsYWNlKC9cXF0kLywgXCJcIik7XG4gIHJldHVybiBob3N0bmFtZSA9PT0gXCJsb2NhbGhvc3RcIiB8fCBob3N0bmFtZSA9PT0gXCIxMjcuMC4wLjFcIiB8fCBob3N0bmFtZSA9PT0gXCI6OjFcIjtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIGdldENsaWVudElwKHJlcXVlc3Q6IFJlcXVlc3QsIHVzZXJJZDogc3RyaW5nKSB7XG4gIGNvbnN0IGZvcndhcmRlZCA9IHJlcXVlc3QuaGVhZGVycy5nZXQoXCJ4LWZvcndhcmRlZC1mb3JcIik/LnNwbGl0KFwiLFwiKS5tYXAoKHZhbHVlKSA9PiB2YWx1ZS50cmltKCkpIHx8IFtdO1xuICBjb25zdCBjbG91ZGZsYXJlID0gcmVxdWVzdC5oZWFkZXJzLmdldChcImNmLWNvbm5lY3RpbmctaXBcIik/LnRyaW0oKTtcbiAgY29uc3QgcmVhbElwID0gcmVxdWVzdC5oZWFkZXJzLmdldChcIngtcmVhbC1pcFwiKT8udHJpbSgpO1xuICBjb25zdCBjYW5kaWRhdGVzID0gWy4uLmZvcndhcmRlZCwgcmVhbElwLCBjbG91ZGZsYXJlXS5maWx0ZXIoKHZhbHVlKTogdmFsdWUgaXMgc3RyaW5nID0+IEJvb2xlYW4odmFsdWUpKTtcbiAgY29uc3Qgbm9ybWFsaXplZCA9IGNhbmRpZGF0ZXMubWFwKCh2YWx1ZSkgPT4gdmFsdWUucmVwbGFjZSgvXjo6ZmZmZjovLCBcIlwiKSk7XG4gIGNvbnN0IGxvb3BiYWNrQWRkcmVzc2VzID0gbmV3IFNldChbXCIxMjcuMC4wLjFcIiwgXCI6OjFcIiwgXCJsb2NhbGhvc3RcIl0pO1xuXG4gIGNvbnN0IHJlbW90ZUFkZHJlc3MgPSBub3JtYWxpemVkLmZpbmQoKHZhbHVlKSA9PiAhbG9vcGJhY2tBZGRyZXNzZXMuaGFzKHZhbHVlKSk7XG4gIGlmIChyZW1vdGVBZGRyZXNzKSByZXR1cm4gcmVtb3RlQWRkcmVzcztcbiAgaWYgKGlzQWRtaW5SZXF1ZXN0KHJlcXVlc3QpICYmIG5vcm1hbGl6ZWRbMF0pIHJldHVybiBub3JtYWxpemVkWzBdO1xuXG4gIC8vIExvY2FsIHJldmVyc2UgcHJveGllcyBtYXkgcmVwb3J0IGV2ZXJ5IExBTiB2aXNpdG9yIGFzIDEyNy4wLjAuMS4gVHJlYXRpbmdcbiAgLy8gdGhhdCBhcyBhIHNoYXJlZCB2aXNpdG9yIElQIHdvdWxkIGxvY2sgZXZlcnkgY29tcHV0ZXIgdG8gdGhlIGZpcnN0IGFjY291bnQuXG4gIHJldHVybiBgdmlzaXRvcjoke3VzZXJJZH1gO1xufVxuIl19

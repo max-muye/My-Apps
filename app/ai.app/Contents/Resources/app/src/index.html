@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Rule Neural Network</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">NN</div>
+          <div>
+            <h1>Custom Rule Neural Network</h1>
+            <p>A multilayer AI trained directly from your boolean check function.</p>
+          </div>
+        </div>
+        <div class="status" id="status">Network ready</div>
+      </header>
+
+      <section class="digit-panel">
+        <div class="panel-heading compact">
+          <div>
+            <h2>Draw a digit</h2>
+            <p>A locally trained neural network recognizes handwritten digits from 0 to 9.</p>
+          </div>
+          <span class="digit-training-status" id="digitTrainingStatus">Add user samples to begin</span>
+        </div>
+        <div class="digit-workspace">
+          <div class="digit-drawing">
+            <canvas id="digitCanvas" width="280" height="280" aria-label="Digit drawing area"></canvas>
+            <div class="digit-actions">
+              <button id="clearDigit" type="button" class="secondary">Clear</button>
+              <button id="trainDigit" type="button" disabled>Train Digit AI</button>
+            </div>
+            <div class="sample-actions">
+              <label for="digitLabel">This drawing is</label>
+              <select id="digitLabel" aria-label="Correct digit label">
+                <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option><option>9</option>
+              </select>
+              <button id="addDigitSample" type="button" class="secondary">Add Sample</button>
+            </div>
+            <small class="sample-count" id="digitSampleCount">0 user samples</small>
+          </div>
+          <div class="digit-result" aria-live="polite">
+            <span>Most like</span>
+            <strong id="digitPrediction">?</strong>
+            <small id="digitConfidence">Draw one digit</small>
+          </div>
+          <div class="digit-scores" id="digitScores"></div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Training controls">
+        <div class="architecture">
+          <span class="label">Architecture</span>
+          <strong id="architectureText">8 → 64 → 32 → 1</strong>
+          <span id="architectureSummary">2,689 trainable parameters</span>
+          <div class="layer-actions">
+            <button id="addLayer" type="button" class="secondary">+ Layer</button>
+          </div>
+          <div class="layer-editor" id="layerEditor"></div>
+        </div>
+        <label class="control-group">
+          <span class="label">Learning rate <output id="rateValue">1.00</output></span>
+          <input id="learningRate" type="range" min="0.05" max="10" value="1" step="0.05" />
+        </label>
+        <label class="control-group">
+          <span class="label">Training steps <output id="epochsValue">5000</output></span>
+          <input id="trainingEpochs" type="range" min="500" max="20000" value="5000" step="500" />
+        </label>
+        <div class="button-row">
+          <button id="train" type="button">Train Fresh</button>
+          <button id="trainUntilPerfect" type="button">Train Until 100%</button>
+          <button id="keepTraining" type="button" class="secondary">Keep Training</button>
+          <button id="stopTraining" type="button" class="stop" disabled>Stop Training</button>
+          <button id="reset" type="button" class="secondary">Reset</button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="network-panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Live network</h2>
+              <p>Each circle is a neuron. Connections brighten as their weights grow.</p>
+            </div>
+            <span class="formula">h(z) = sigmoid(z)</span>
+          </div>
+          <canvas id="networkCanvas" width="760" height="500" aria-label="Neural network visualization"></canvas>
+          <div class="layer-labels" id="layerLabels"></div>
+        </div>
+
+        <aside class="side-panel">
+          <section class="test-panel">
+            <span class="eyebrow">Test the AI</span>
+            <label for="numberInput" id="numberInputLabel">Number from 0 to 255</label>
+            <div class="number-control">
+              <button id="decrease" type="button" class="icon" aria-label="Decrease number">−</button>
+              <input id="numberInput" type="number" min="0" max="255" value="42" />
+              <button id="increase" type="button" class="icon" aria-label="Increase number">+</button>
+            </div>
+            <div class="binary" id="binaryValue">00101010</div>
+            <div class="prediction">
+              <div class="probability-ring" id="probabilityRing"><strong id="probability">50%</strong><span>network output</span></div>
+              <div class="answer"><span>AI output</span><strong id="prediction">50%</strong><small id="expected">Training target: 0%</small></div>
+            </div>
+          </section>
+
+          <section class="metrics-panel">
+            <div class="metric-grid">
+              <div><span>Steps learned</span><strong id="epochCount">0</strong></div>
+              <div><span>Accuracy</span><strong id="accuracy">50.0%</strong></div>
+              <div><span>Loss</span><strong id="loss">0.6931</strong></div>
+              <div><span>Parameters</span><strong id="parameterCount">2,689</strong></div>
+            </div>
+            <div class="progress-heading"><h2>Learning progress</h2><span id="progressLabel">Not trained</span></div>
+            <canvas id="lossCanvas" width="480" height="180" aria-label="Training loss graph"></canvas>
+          </section>
+        </aside>
+      </section>
+
+      <section class="examples-panel">
+        <div class="panel-heading compact">
+          <div><h2>What the network has learned</h2><p id="examplesDescription">Check results for the first sixteen numbers from the 256-example training set.</p></div>
+        </div>
+        <div class="example-grid" id="exampleGrid"></div>
+      </section>
+
+      <section class="check-panel">
+        <div class="panel-heading compact">
+          <div>
+            <h2>Custom correctness check</h2>
+            <p id="checkStatus">Default check active</p>
+          </div>
+          <span class="formula">check(input, prediction: 0..100)</span>
+        </div>
+        <textarea id="checkEditor" spellcheck="false" aria-label="Custom check function">function check(input, prediction) {
+  return Math.round(prediction / 50) === input % 3;
+}</textarea>
+        <div class="check-actions">
+          <button id="applyCheck" type="button">Apply Check</button>
+          <button id="resetCheck" type="button" class="secondary">Restore Default</button>
+        </div>
+      </section>
+    </main>
+    <script src="./mnist-samples.js" defer></script>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

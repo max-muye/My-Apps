@@ -1,0 +1,36 @@
+#!/bin/zsh
+APP_DIR="${0:A:h:h}"
+SERVER="$APP_DIR/Resources/server.js"
+PORT=3000
+NODE_BIN=""
+
+for CANDIDATE in \
+  "$APP_DIR/Resources/node/bin/node" \
+  "$HOME/.nvm/versions/node/v24.12.0/bin/node" \
+  "$HOME/.nvm/versions/node/current/bin/node" \
+  "/opt/homebrew/bin/node" \
+  "/usr/local/bin/node" \
+  "/usr/bin/node"
+do
+  if [ -x "$CANDIDATE" ]; then
+    NODE_BIN="$CANDIDATE"
+    break
+  fi
+done
+
+if [ -z "$NODE_BIN" ]; then
+  osascript -e 'display dialog "Localtalk needs Node.js to run." buttons {"OK"} default button "OK" with title "Localtalk"'
+  exit 1
+fi
+
+IPV4_LINES="$(ifconfig | awk '/inet / && $2 != "127.0.0.1" { print "Talk page: http://"$2":3000" }')"
+if [ -z "$IPV4_LINES" ]; then
+  IPV4_LINES="Talk page: no active IPv4 network address found"
+fi
+
+osascript <<APPLESCRIPT
+tell application "Terminal"
+  activate
+  do script "printf '\\\\033]0;Localtalk - Control+C to quit\\\\007'; clear; echo 'Admin page: http://localhost:$PORT'; printf '%s\\\\n' '$IPV4_LINES'; echo 'Control+C to quit'; echo ''; open 'http://localhost:$PORT'; if curl -fsS 'http://127.0.0.1:$PORT/' >/dev/null 2>&1; then echo 'Localtalk is already running on port $PORT.'; echo 'Use the pages above, or press Control+C in the original Localtalk window to stop it.'; else '$NODE_BIN' '$SERVER'; fi"
+end tell
+APPLESCRIPT

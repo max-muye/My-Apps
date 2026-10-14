@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Desktop Browser</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="chrome">
+        <div class="tab-strip" id="tabStrip"></div>
+        <button class="icon-button new-tab" id="newTabButton" title="New tab" aria-label="New tab">+</button>
+      </header>
+
+      <nav class="toolbar" aria-label="Browser controls">
+        <button class="icon-button" id="backButton" title="Back" aria-label="Back">‹</button>
+        <button class="icon-button" id="forwardButton" title="Forward" aria-label="Forward">›</button>
+        <button class="icon-button" id="reloadButton" title="Reload" aria-label="Reload">↻</button>
+        <button class="icon-button" id="homeButton" title="Home" aria-label="Home">⌂</button>
+        <form class="address-form" id="addressForm">
+          <input id="addressInput" autocomplete="off" spellcheck="false" aria-label="Address bar" />
+        </form>
+        <button class="icon-button" id="bookmarkButton" title="Bookmark page" aria-label="Bookmark page">☆</button>
+        <button class="text-button" id="bookmarksButton">Bookmarks</button>
+        <button class="text-button" id="downloadsButton">Downloads</button>
+        <button class="icon-button" id="settingsButton" title="Settings" aria-label="Settings">⚙</button>
+      </nav>
+
+      <main class="content">
+        <section class="webview-stack" id="webviewStack"></section>
+        <aside class="side-panel" id="sidePanel" hidden></aside>
+      </main>
+    </div>
+
+    <template id="tabTemplate">
+      <button class="tab" type="button">
+        <span class="tab-title"></span>
+        <span class="tab-loading" hidden></span>
+        <span class="tab-close" role="button" aria-label="Close tab">×</span>
+      </button>
+    </template>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>
