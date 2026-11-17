@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Computer Beep</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    body { max-width: 42rem; margin: 3rem auto; padding: 0 1rem; background: #111; color: #f4f0e8; }
+    label { display: block; margin: 1rem 0 .35rem; }
+    input, button { box-sizing: border-box; width: 100%; padding: .75rem; font: inherit; }
+    input { background: #1e2422; color: inherit; border: 1px solid #60706a; border-radius: 6px; }
+    button { margin-top: 1.25rem; border: 0; border-radius: 6px; background: #f2ba63; color: #17120b; font-weight: 700; cursor: pointer; }
+    .preset { display: grid; grid-template-columns: 1fr auto auto; gap: .6rem; align-items: center; padding: .8rem 0; border-top: 1px solid #39443f; }
+    .preset button { width: auto; margin: 0; padding: .55rem .8rem; }
+    .delete { background: #c95c5c; }
+    .empty { color: #9da8a3; }
+    .secondary { background: #8ed8bc; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    output { display: block; margin-top: 1rem; color: #8ee0bb; min-height: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>Computer beep</h1>
+  <label for="seconds">Time (seconds)</label>
+  <input id="seconds" type="number" min="0.01" step="0.01" value="1">
+  <label for="volume">Volume (0 to 1)</label>
+  <input id="volume" type="number" min="0" max="1" step="0.01" value="0.4">
+  <label for="note">Note (1–7 = Do–Ti; .5 = sharp)</label>
+  <input id="note" type="number" step="1" value="69">
+  <button id="add" type="button">Add beep</button>
+  <button id="add-pause" class="secondary" type="button">Add pause</button>
+  <h2>Saved beeps</h2>
+  <button id="play-song" type="button">Play song</button>
+  <button id="end-play" class="secondary" type="button" disabled>End play</button>
+  <div id="presets"><p class="empty">No saved beeps yet.</p></div>
+  <output id="status" aria-live="polite"></output>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const storageKey = 'computer-beeps';
+    let presets = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    let stopRequested = false;
+    let activeOscillator = null;
+    let activeAudio = null;
+
+    function values() {
+      return {
+        seconds: Math.max(0.01, Number($('seconds').value)),
+        volume: Math.min(1, Math.max(0, Number($('volume').value))),
+        note: Math.round(Number($('note').value))
+      };
+    }
+
+    function noteFrequency(note) {
+      const naturalSteps = [0, 2, 4, 5, 7, 9, 11];
+      const wholeNote = Math.floor(note);
+      const octave = Math.floor((wholeNote - 1) / 7);
+      const degree = ((wholeNote - 1) % 7 + 7) % 7;
+      const sharp = Math.abs(note - wholeNote) === 0.5 ? 1 : 0;
+      const semitones = octave * 12 + naturalSteps[degree] + sharp;
+      return 261.625565 * 2 ** (semitones / 12);
+    }
+
+    async function play(beep) {
+      const { seconds, volume, note } = beep;
+      if (!Number.isInteger(note)) {
+        $('status').textContent = 'MIDI note must be an integer.';
+        return;
+      }
+      if (beep.pause) {
+        $('status').textContent = `Pause for ${seconds} seconds.`;
+        await new Promise((resolve) => {
+          const started = performance.now();
+          const tick = () => {
+            if (stopRequested || performance.now() - started >= seconds * 1000) resolve();
+            else setTimeout(tick, 25);
+          };
+          tick();
+        });
+        return;
+      }
+      const audio = new AudioContext();
+      activeAudio = audio;
+      await audio.resume();
+      const oscillator = audio.createOscillator();
+      activeOscillator = oscillator;
+      const gain = audio.createGain();
+      oscillator.frequency.value = noteFrequency(note);
+      gain.gain.value = volume;
+      oscillator.connect(gain).connect(audio.destination);
+      oscillator.start();
+      oscillator.stop(audio.currentTime + seconds);
+      await new Promise((resolve) => oscillator.addEventListener('ended', resolve, { once: true }));
+      await audio.close();
+      activeOscillator = null;
+      activeAudio = null;
+      $('status').textContent = `Playing MIDI note ${note}.`;
+    }
+
+    function save() {
+      localStorage.setItem(storageKey, JSON.stringify(presets));
+    }
+
+    function render() {
+      const root = $('presets');
+      root.replaceChildren();
+      if (!presets.length) {
+        root.innerHTML = '<p class="empty">No saved beeps yet.</p>';
+        return;
+      }
+      presets.forEach((beep, index) => {
+        const row = document.createElement('div');
+        row.className = 'preset';
+        row.innerHTML = `<strong>${beep.pause ? 'Pause' : 'Beep'}</strong><span>${beep.pause ? `${beep.seconds}s pause` : `${beep.seconds}s · volume ${beep.volume} · note ${beep.note}`}</span>`;
+        const playButton = document.createElement('button');
+        playButton.textContent = 'Play';
+        playButton.addEventListener('click', () => play(beep));
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+          presets.splice(index, 1);
+          save();
+          render();
+        });
+        row.append(playButton, deleteButton);
+        root.append(row);
+      });
+    }
+
+    $('add').addEventListener('click', () => {
+      const beep = values();
+      if (!Number.isInteger(beep.note)) {
+        $('status').textContent = 'MIDI note must be an integer.';
+        return;
+      }
+      presets.unshift(beep);
+      save();
+      render();
+      $('status').textContent = 'Beep added.';
+    });
+
+    $('add-pause').addEventListener('click', () => {
+      const seconds = Math.max(0.01, Number($('seconds').value));
+      presets.unshift({ seconds, volume: 0, note: 0, pause: true });
+      save();
+      render();
+      $('status').textContent = 'Pause added.';
+    });
+
+    $('play-song').addEventListener('click', async () => {
+      if (!presets.length) {
+        $('status').textContent = 'Add at least one beep first.';
+        return;
+      }
+      stopRequested = false;
+      $('play-song').disabled = true;
+      $('end-play').disabled = false;
+      $('status').textContent = 'Playing song...';
+      for (const beep of [...presets].reverse()) {
+        await play(beep);
+        if (stopRequested) break;
+      }
+      $('play-song').disabled = false;
+      $('end-play').disabled = true;
+      $('status').textContent = stopRequested ? 'Playback ended.' : 'Song finished.';
+    });
+
+    $('end-play').addEventListener('click', () => {
+      stopRequested = true;
+      if (activeOscillator) activeOscillator.stop();
+      if (activeAudio) activeAudio.close().catch(() => {});
+    });
+
+    render();
+  </script>
+</body>
+</html>
